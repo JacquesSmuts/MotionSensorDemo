@@ -50,11 +50,7 @@ class MainActivity : Activity() {
 
     fun lightToggle(toggleOn: Boolean){
 
-        if (toggleOn){
-            lightGpio?.setDirection(Gpio.ACTIVE_HIGH)
-        } else {
-            lightGpio?.setDirection(Gpio.ACTIVE_LOW)
-        }
+        lightGpio?.value = toggleOn
     }
 
 
@@ -84,7 +80,9 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        motionSensorGpio?.close()
         motionSensorGpio = null;
+        lightGpio?.close()
         lightGpio = null
         super.onDestroy()
     }
