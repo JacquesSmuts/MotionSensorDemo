@@ -31,11 +31,13 @@ import com.google.android.things.pio.PeripheralManagerService
 class MainActivity : Activity() {
 
     private val MOTION_SENSOR_PIN = "GPIO_35"
+    private val LIGHT_PIN = "GPIO_174"
     private val TAG = "MainActivity"
 
     private lateinit var textViewMain : TextView
 
     private var motionSensorGpio: Gpio? = null
+    private var lightGpio: Gpio? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +46,15 @@ class MainActivity : Activity() {
         textViewMain = findViewById(R.id.text_main)
 
         start();
+    }
+
+    fun lightToggle(toggleOn: Boolean){
+
+        if (toggleOn){
+            lightGpio?.setDirection(Gpio.ACTIVE_HIGH)
+        } else {
+            lightGpio?.setDirection(Gpio.ACTIVE_LOW)
+        }
     }
 
 
@@ -55,21 +66,26 @@ class MainActivity : Activity() {
         motionSensorGpio?.registerGpioCallback(object : GpioCallback() {
             override fun onGpioEdge(gpio: Gpio): Boolean {
                 if (gpio.value) {
-                    Log.d(TAG, "onMotionEdge")
+                    //Log.d(TAG, "onMotionEdge")
                     textViewMain.setText("MOTION OMG!")
-                    //motionListener.onMotionDetected()
                 } else {
-                    Log.d(TAG, "no Motion Detected")
+                    //Log.d(TAG, "no Motion Detected")
                     textViewMain.setText("all is quiet...")
-                    //motionListener.onMotionStopped()
                 }
+
+                lightToggle(gpio.value)
                 return true
             }
         })
+
+        //Setup light
+        lightGpio = PeripheralManagerService().openGpio(LIGHT_PIN)
+        lightGpio?.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW)
     }
 
     override fun onDestroy() {
         motionSensorGpio = null;
+        lightGpio = null
         super.onDestroy()
     }
 
