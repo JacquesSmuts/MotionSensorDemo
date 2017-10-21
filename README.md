@@ -7,3 +7,5 @@ https://docs.google.com/presentation/d/1gCYr2Gsz28kfzjBCuDk86If1dHyECb3ZWPLx9ITW
 We were using this kit:
 https://developer.android.com/things/hardware/imx7d-kit.html
 
+The firebase project is further explored here:
+https://www.hackster.io/riggaroo/smart-motion-sensing-camera-with-intruder-notifications-b6c613
