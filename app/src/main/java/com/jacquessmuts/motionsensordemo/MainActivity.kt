@@ -1,8 +1,11 @@
 package com.jacquessmuts.motionsensordemo
 
 import android.app.Activity
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
+import android.widget.ImageView
 import android.widget.TextView
 import com.google.android.things.pio.Gpio
 import com.google.android.things.pio.GpioCallback
@@ -35,17 +38,22 @@ class MainActivity : Activity() {
     private val TAG = "MainActivity"
 
     private lateinit var textViewMain : TextView
+    private lateinit var imageViewPhoto : ImageView
 
     private var motionSensorGpio: Gpio? = null
     private var lightGpio: Gpio? = null
+    private var camera: CustomCamera? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         textViewMain = findViewById(R.id.text_main)
+        imageViewPhoto = findViewById(R.id.image_picture)
 
-        start();
+        start()
+        setupCamera()
     }
 
     fun lightToggle(toggleOn: Boolean){
@@ -53,6 +61,17 @@ class MainActivity : Activity() {
         lightGpio?.value = toggleOn
     }
 
+    private fun setupCamera() {
+        camera = CustomCamera.getInstance()
+        camera?.initializeCamera(this, Handler(), imageAvailableListener)
+    }
+
+    private val imageAvailableListener = object : CustomCamera.ImageCapturedListener {
+        override fun onImageCaptured(bitmap: Bitmap) {
+            Log.d(TAG, "imageCaptured");
+            imageViewPhoto.setImageBitmap(bitmap)
+        }
+    }
 
     fun start() {
         motionSensorGpio = PeripheralManagerService().openGpio(MOTION_SENSOR_PIN)
@@ -62,10 +81,10 @@ class MainActivity : Activity() {
         motionSensorGpio?.registerGpioCallback(object : GpioCallback() {
             override fun onGpioEdge(gpio: Gpio): Boolean {
                 if (gpio.value) {
-                    //Log.d(TAG, "onMotionEdge")
                     textViewMain.setText("MOTION OMG!")
+                    Log.d(TAG, "taking photo...")
+                    camera?.takePicture()
                 } else {
-                    //Log.d(TAG, "no Motion Detected")
                     textViewMain.setText("all is quiet...")
                 }
 
